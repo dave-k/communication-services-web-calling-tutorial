@@ -2,16 +2,22 @@
 const CommunicationIdentityClient = require("@azure/communication-administration").CommunicationIdentityClient;
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const config = require("./config.json");
+const webpack = require('webpack');
 
-if(!config || !config.connectionString || config.connectionString.indexOf('endpoint=') === -1)
-{
-    throw new Error("Update `config.json` with connection string");
-}
+module.exports = (env) => {
+  var communicationIdentityClient;
+  new webpack.EnvironmentPlugin(['CONNECTION_STRING']);
 
-const communicationIdentityClient = new  CommunicationIdentityClient(config.connectionString);
-
-
-module.exports = {
+  if (process.env.CONNECTION_STRING) {
+    communicationIdentityClient = new CommunicationIdentityClient(process.env.CONNECTION_STRING);
+  } else {
+    if(!config || !config.connectionString || config.connectionString.indexOf('endpoint=') === -1)
+    {
+      throw new Error("Update `config.json` with connection string");
+    }
+    communicationIdentityClient = new  CommunicationIdentityClient(config.connectionString);
+  }
+  return {
     devtool: 'inline-source-map',
     mode: 'development',
     entry: "./src/index.js",
@@ -58,4 +64,5 @@ module.exports = {
             });
         }
     }
+  };
 };
